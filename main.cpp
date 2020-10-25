@@ -24,7 +24,6 @@ int REG_read1(int a){
   return data1;
 }
 void REG_readm(int a){
-  int data1;
   Wire.beginTransmission(Addr);
   Wire.write(a);  //  選擇暫存器
   Wire.endTransmission(0);  
@@ -32,7 +31,6 @@ void REG_readm(int a){
   int c=0;
   while(Wire.available()){
     arr[c]=Wire.read();
-    Serial.print(arr[c],HEX);Serial.print(" , ");
     c++;
   }
   Serial.println();
@@ -78,12 +76,20 @@ void setup()
 
 void loop()
 {
-  //REG_readm(0x04);
-  //Serial.println(REG_readm(0x00));
   REG_readm(0x04);
-  int x = arr[3]|((arr[4]<<24)>>17);
-  int y = arr[5]|((arr[6]<<24)>>17);
+  int x = (arr[3]>>1)|((arr[4]<<24)>>17);
+  int y = (arr[5]>>1)|((arr[6]<<24)>>17);
   int z = arr[7]|((arr[8]<<24)>>16);
-  Serial.print("x=");Serial.print(x);Serial.print(" , ");Serial.print("y=");Serial.print(y);Serial.print(" , ");Serial.print("z=");Serial.print(z);Serial.println();
-  delay(500);
+  float a=x;
+  float b=y;
+  float c=z;
+  a=a/256;
+  b=b/256;
+  c=c/256;
+  Serial.print("x=");Serial.print(a);Serial.print(" g, ");Serial.print("y=");Serial.print(b);Serial.print(" g, ");Serial.print("z=");Serial.print(c);Serial.println(" g");
+  if((x>150)||(x<(-150))||(y>150)||(y<(-150))||(z>150)||(z<(-150))){
+    Serial.println("over");
+  }
+  Serial.println();
+  delay(100);
 }
