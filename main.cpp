@@ -23,34 +23,45 @@ int REG_read1(int a){
   data1 = Wire.read(); //read data
   return data1;
 }
+
+//sensor data output
 void REG_readm(int a){
   Wire.beginTransmission(Addr);
-  Wire.write(a);  //  選擇暫存器
+  //  choose Register a
+  Wire.write(a); 
   Wire.endTransmission(0);  
-  Wire.requestFrom(Addr, 11); //request 11 bytes
+  //request 11 bytes and save them in arr[]
+  Wire.requestFrom(Addr, 11); 
   int c=0;
   while(Wire.available()){
     arr[c]=Wire.read();
     c++;
   }
-  Serial.println();
 }
+
 void rinit(void){
-  REG_write(0x01,2);
+
+  /*Power-on reset*/
+  REG_write(0x01,2);  delay(100);
+
+  /*Read the Register 00h (PID) for product ID. The PID value should be 0xA3. Check the
+  I2C connections if the report value is otherwise. */
   if(REG_read1(0x00)!=0xA3){
     Serial.println("i2c error");
     return ;
   }
 
-  REG_write(0x18,0x40);  
-  delay(100);
-  Serial.println("0x18=");Serial.println(REG_read1(0x18));
-  REG_write(0x15,0x2A);  
-  delay(100);
-  Serial.println("0x15=");Serial.println(REG_read1(0x15));
-  REG_write(0x16,0x09);  //low-pass filter
-  delay(100);
-  Serial.println("0x16=");Serial.println(REG_read1(0x16));
+  /* turn on the offset temperature compensation. */
+  REG_write(0x18,0x40);  delay(100);
+
+  /*turn on the data ready interrupt and configure the
+  INT pin to active high, push-pull type*/
+  REG_write(0x15,0x2A);  delay(100);
+
+  /*Write 0x09 to Register 16h. This will turn on the internal low-pass filter. Depending on
+  the application, user may set 0x00 to Register 16h to turn it off, or set 0x12 to Register 16h to
+  turn on the high-pass filter instead. */
+  REG_write(0x16,0x09);  delay(100);
 
 }
 void threshold(int a){
@@ -66,11 +77,8 @@ void setup()
   Wire.begin();
   Serial.begin(9600);
   Serial.println("Serial_begin");
-  //rinit();
+  rinit();
   Serial.println("init_done");
-  delay(100);
-  //motion();
-  Serial.println("motion_done");
   delay(100);
 }
 
@@ -80,13 +88,13 @@ void loop()
   int x = (arr[3]>>1)|((arr[4]<<24)>>17);
   int y = (arr[5]>>1)|((arr[6]<<24)>>17);
   int z = arr[7]|((arr[8]<<24)>>16);
-  float a=x;
-  float b=y;
-  float c=z;
-  a=a/256;
-  b=b/256;
-  c=c/256;
-  Serial.print("x=");Serial.print(a);Serial.print(" g, ");Serial.print("y=");Serial.print(b);Serial.print(" g, ");Serial.print("z=");Serial.print(c);Serial.println(" g");
+  float xg=x;
+  float yg=y;
+  float zg=z;
+  xg=xg/256;
+  yg=yg/256;
+  zg=zg/256;
+  Serial.print("x=");Serial.print(xg);Serial.print(" g, ");Serial.print("y=");Serial.print(yg);Serial.print(" g, ");Serial.print("z=");Serial.print(zg);Serial.println(" g");
   if((x>150)||(x<(-150))||(y>150)||(y<(-150))||(z>150)||(z<(-150))){
     Serial.println("over");
   }
