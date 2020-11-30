@@ -14,6 +14,17 @@ void REG_write(int a,int b){
   Wire.endTransmission();  
 }
 
+//Switch from CM to NCM
+void REG_write_CM(void){ 
+  Wire.beginTransmission(Addr);
+  Wire.write(0x02);  //  選擇02h
+  Wire.write(0x02);  //  寫入值
+  Wire.write(0x00);  
+  Wire.write(0x08);
+  Wire.write(0x00);
+  Wire.endTransmission();  
+}
+
 int REG_read1(int a){
   int data1;
   Wire.beginTransmission(Addr);
@@ -61,8 +72,10 @@ void rinit(void){
   /*Write 0x09 to Register 16h. This will turn on the internal low-pass filter. Depending on
   the application, user may set 0x00 to Register 16h to turn it off, or set 0x12 to Register 16h to
   turn on the high-pass filter instead. */
-  REG_write(0x16,0x09);  delay(100);
 
+  //REG_write(0x16,0x09);  delay(100);
+  REG_write(0x16,0x00);  delay(100);
+  //REG_write(0x16,0x12);  delay(100);
 }
 void threshold(int a){
   REG_write(0x03,a);
@@ -78,6 +91,8 @@ void setup()
   Serial.begin(9600);
   Serial.println("Serial_begin");
   rinit();
+  //REG_write_CM();
+  delay(100);
   Serial.println("init_done");
   delay(100);
 }
@@ -94,7 +109,8 @@ void loop()
   xg=xg/256;
   yg=yg/256;
   zg=zg/256;
-  Serial.print("x=");Serial.print(xg);Serial.print(" g, ");Serial.print("y=");Serial.print(yg);Serial.print(" g, ");Serial.print("z=");Serial.print(zg);Serial.println(" g");
+  //Serial.print("x=");Serial.print(xg);Serial.print(" g, ");Serial.print("y=");Serial.print(yg);Serial.print(" g, ");Serial.print("z=");Serial.print(zg);Serial.println(" g");
+  Serial.print("x=");Serial.print(x);Serial.print(" , ");Serial.print("y=");Serial.print(y);Serial.print(" , ");Serial.print("z=");Serial.print(z);
   if((x>150)||(x<(-150))||(y>150)||(y<(-150))||(z>150)||(z<(-150))){
     Serial.println("over");
   }
