@@ -1,5 +1,4 @@
 #include <Arduino.h>
-
 #include <Wire.h>
 #include <math.h>
 
@@ -77,10 +76,13 @@ void rinit(void){
   REG_write(0x16,0x00);  delay(100);
   //REG_write(0x16,0x12);  delay(100);
 }
+
 void threshold(int a){
   REG_write(0x03,a);
 }
-void motion(void){//Motion Detection Function
+
+//Motion Detection Function
+void motion(void){
   threshold(10);
 }
 
@@ -100,20 +102,20 @@ void setup()
 void loop()
 {
   REG_readm(0x04);
-  int x = (arr[3]>>1)|((arr[4]<<24)>>17);
-  int y = (arr[5]>>1)|((arr[6]<<24)>>17);
+  int x = (arr[3]|((arr[4]<<24)>>16))>>1;
+  int y = (arr[5]|((arr[6]<<24)>>16))>>1;
   int z = arr[7]|((arr[8]<<24)>>16);
-  float xg=x;
+  Serial.print("x=");Serial.print(x);Serial.print(" , ");Serial.print("y=");Serial.print(y);Serial.print(" , ");Serial.print("z=");Serial.print(z);
+  
+  //acceleration
+  /*float xg=x;
   float yg=y;
   float zg=z;
   xg=xg/256;
   yg=yg/256;
   zg=zg/256;
-  //Serial.print("x=");Serial.print(xg);Serial.print(" g, ");Serial.print("y=");Serial.print(yg);Serial.print(" g, ");Serial.print("z=");Serial.print(zg);Serial.println(" g");
-  Serial.print("x=");Serial.print(x);Serial.print(" , ");Serial.print("y=");Serial.print(y);Serial.print(" , ");Serial.print("z=");Serial.print(z);
-  if((x>150)||(x<(-150))||(y>150)||(y<(-150))||(z>150)||(z<(-150))){
-    Serial.println("over");
-  }
+  Serial.print("x=");Serial.print(xg);Serial.print(" g, ");Serial.print("y=");Serial.print(yg);Serial.print(" g, ");Serial.print("z=");Serial.print(zg);Serial.println(" g");*/
+
   Serial.println();
   delay(100);
 }
